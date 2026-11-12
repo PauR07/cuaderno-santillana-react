@@ -1,120 +1,76 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useState, useEffect } from 'react'
+import ListaTareas from './ListaTareas.jsx'
+import Formulario from './Formulario.jsx'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [tareas, setTareas] = useState(JSON.parse(localStorage.getItem("tareas")) ? JSON.parse(localStorage.getItem("tareas")) : [])
+  const [nuevaTarea, setNuevaTarea] = useState("")
+  const [filtro, setFiltro] = useState("todas")
+  const tareasPendientes = tareas.filter((tarea) => { return tarea.completada === false }).length
+  function borrarTarea(id) {
+    setTareas(tareas.filter(tarea => tarea.id !== id))
+  }
+  function completarTarea(id) {
+    setTareas(tareas.map(tarea => {
+      if (tarea.id === id) {
+        const tareaActualizada = {
+          ...tarea, completada: !tarea.completada
+        }
+        return tareaActualizada
+      }
+      return tarea
+    }))
+  }
 
+  function agregarTarea(e) {
+    e.preventDefault()
+    if (nuevaTarea.trim()) {
+      setTareas([...tareas, {
+        id: crypto.randomUUID(),
+        texto: nuevaTarea.trim(),
+        completada: false
+      }])
+      setNuevaTarea("")
+
+    }
+
+  }
+  useEffect(()=>{
+    localStorage.setItem("tareas",JSON.stringify(tareas))},[tareas]
+  )
   return (
+    // <main className='app'>
+
+    // </main>
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className='titulo'>
+      <h1>Pendientes {tareasPendientes}</h1>
+      </div>
+      <div className='cuadroFormulario'>
+      <p>Mi lista de tareas</p>
+      <Formulario 
+      nuevaTarea={nuevaTarea}
+      setNuevaTarea={setNuevaTarea}
+      agregarTarea={agregarTarea}/>
+      
+<div className='caja-botones'>
+      <button onClick={() => setFiltro("todas")}>Todas</button>
+      <button onClick={() => setFiltro("pendientes")}>Pendientes</button>
+      <button onClick={() => setFiltro("completadas")}>Completadas</button>
+</div>
+</div>
+      <ListaTareas
+        tareas={tareas}
+        borrarTarea={borrarTarea}
+        completarTarea={completarTarea}
+        filtro={filtro} />
 
-      <div className="ticks"></div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+
+
+
     </>
   )
 }
